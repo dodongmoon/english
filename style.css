@@ -1,0 +1,333 @@
+/* Updated CSS for a more modern, Toss-inspired design */
+
+/* Redefined color variables for a fresher, modern palette */
+:root {
+  --toss-blue: #4A90E2;
+  --toss-light-blue: #E8F0FE;
+  --toss-green: #2AC1BC;
+  --toss-red: #FF5B5B;
+  --toss-gray-50: #f9f9f9;
+  --toss-gray-100: #F2F4F7;
+  --toss-gray-200: #E5E8EB;
+  --toss-gray-300: #D1D6DB;
+  --toss-gray-400: #B0B8C1;
+  --toss-gray-500: #8B95A1;
+  --toss-gray-600: #6B7684;
+  --toss-gray-700: #4E5968;
+  --toss-gray-800: #333D4B;
+  --toss-gray-900: #191F28;
+
+  --primary-color: var(--toss-blue);
+  --primary-light: var(--toss-light-blue);
+  --secondary-color: var(--toss-gray-600);
+  --success-color: var(--toss-green);
+  --error-color: var(--toss-red);
+  --background-color: white;
+  --text-color: var(--toss-gray-800);
+  --border-color: var(--toss-gray-200);
+  --font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Global resets and modern background */
+body {
+  background: var(--toss-gray-50);
+  color: var(--text-color);
+  font-family: var(--font-family);
+  line-height: 1.5;
+  margin: 0;
+  min-height: 100vh;
+}
+
+/* Container styled as a modern card with soft shadows */
+.container {
+  max-width: 1100px;
+  margin: 2rem auto;
+  padding: 2.5rem;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+/* Header with updated typography and subtle border accent */
+h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--toss-gray-100);
+}
+
+/* Step containers receive a clean card look with smooth hover elevation */
+.step-container {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  border: 1px solid var(--border-color);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.step-container:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+}
+
+.step-container h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--toss-gray-700);
+  margin-bottom: 1.5rem;
+}
+
+/* Flex layout for grouped buttons */
+.button-group {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* Modern button design with balanced padding, rounded corners, and a smooth hover effect */
+button {
+  font-family: var(--font-family);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  padding: 0.875rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Primary action buttons (selection, confirmation) */
+.pagination a {
+  background: var(--toss-blue);
+  box-shadow: 0 3px 10px rgba(74, 144, 226, 0.2);
+}
+
+/* Secondary action buttons */
+button[onclick^="select"] {
+  background: var(--toss-green);
+  box-shadow: 0 3px 10px rgba(42, 193, 188, 0.2);
+}
+
+/* Category selection buttons */
+#step-category .button-group button {
+  background: var(--toss-gray-700);
+  box-shadow: 0 3px 10px rgba(139, 149, 161, 0.2);
+}
+
+/* Textbook selection buttons */
+#step-textbook .button-group button {
+  background: var(--toss-gray-800);
+  box-shadow: 0 3px 10px rgba(51, 61, 75, 0.2);
+}
+
+/* Lesson selection buttons */
+#step-lesson .button-group button {
+  background: #303F9F;
+  box-shadow: 0 3px 10px rgba(74, 144, 226, 0.2);
+}
+
+button:hover, .pagination a:hover {
+  background: #3A7CD6;
+}
+
+#word-arrange-btn.arrange-header:hover {
+  background: #1fb4af;
+}
+
+button[onclick^="select"]:hover {
+  background: #1fbab8;
+}
+
+#step-category .button-group button:hover {
+  background: var(--toss-gray-600);
+}
+
+#step-textbook .button-group button:hover {
+  background: var(--toss-gray-700);
+}
+
+#step-lesson .button-group button:hover {
+  background: #1A237E;
+}
+
+/* Sentence card styling updated for a modern interactive feel */
+.sentence-pair {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--border-color);
+}
+
+.sentence-pair:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.sentence-pair.selected {
+  transform: none;
+  box-shadow: none;
+  border-left: 4px solid var(--primary-color);
+  background: var(--primary-light);
+}
+
+/* Typography for sentence pairs */
+.english, .korean {
+  font-size: 1rem;
+  line-height: 1.7;
+  margin-bottom: 1rem;
+}
+
+.english {
+  color: var(--toss-gray-900);
+  font-weight: 500;
+}
+
+.korean {
+  color: var(--toss-gray-600);
+  font-weight: 600;
+}
+
+/* Draggable control panel with a modern fixed positioning look */
+.controls {
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: white;
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  cursor: move;
+}
+
+/* Arrange container and interactive elements */
+.arrange-container {
+  background: var(--toss-light-blue);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 1rem;
+  margin-top: 1rem;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.arrange-header {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.shuffled-words, .arranged-words {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+.word-group, .arranged-word {
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  color: var(--text-color);
+}
+
+.word-group:hover, .arranged-word:hover {
+  background: var(--primary-light);
+}
+
+.arranged-word.correct {
+  border-color: var(--success-color);
+  background: #e0f7f4;
+}
+
+.arranged-word.incorrect {
+  border-color: var(--error-color);
+  background: #ffecec;
+}
+
+/* Pagination links updated for a crisp modern look */
+.pagination a {
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  background: var(--primary-color);
+  color: white;
+  border-radius: 10px;
+  transition: transform 0.2s, background 0.2s;
+  margin-right: 0.5rem;
+}
+
+.pagination a:hover {
+  background: #3A7CD6;
+  transform: translateY(-2px);
+}
+
+.page-number {
+  font-weight: 600;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+/* Override hover effect for the category selection container */
+#step-category:hover {
+  transform: none !important;
+  box-shadow: none !important;
+  border-left: none !important;
+  background: white !important;
+}
+
+/* Added override: Remove hover moving effects for textbook and lesson selection containers */
+#step-textbook:hover, #step-lesson:hover {
+  transform: none !important;
+  box-shadow: none !important;
+  border-left: none !important;
+  background: white !important;
+}
+
+/* Utility class to hide elements */
+.hidden {
+  display: none;
+}
+
+/* Define specific colors for '빈칸 만들기' and '단어 배열' buttons */
+#blank-btn {
+  background: var(--toss-green); /* 초록색 */
+  box-shadow: 0 3px 10px rgba(42, 193, 188, 0.2); /* 그림자도 초록색 계열로 */
+}
+
+#word-arrange-btn {
+  background: #FF8C00; /* 주황색 */
+  box-shadow: 0 3px 10px rgba(255, 140, 0, 0.2); /* 그림자도 주황색 계열로 */
+}
+
+/* Hover states for the modified buttons */
+#blank-btn:hover {
+  background: #22a69b; /* 초록색 hover */
+}
+
+#word-arrange-btn:hover {
+  background: #e67700; /* 주황색 hover */
+}
+/* 과 선택 영역(#step-lesson) 내부의 버튼 그룹만 세로 배치 */
+#step-lesson .button-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
