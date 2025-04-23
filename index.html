@@ -7,12 +7,10 @@
 </head>
 <body>
 
-  <!-- (고정) '빈칸 만들기', '단어 배열' 버튼 + '정답' 버튼 추가 -->
+  <!-- (고정) '빈칸 만들기', '단어 배열' 버튼만 남김 -->
   <div class="controls" id="controls">
     <button id="blank-btn">빈칸 만들기</button>
     <button id="word-arrange-btn">단어 배열</button>
-    <!-- 새로 추가한 정답 버튼 -->
-    <button id="show-answer-btn">정답</button>
   </div>
 
   <div class="container">
@@ -56,7 +54,7 @@
 
   <script>
     /****************************************************************
-     * 자바스크립트 로직 (데이터 구조, 분기, 페이지, 빈칸, 단어배열 등)
+     * 자바스크립트 로직 (데이터 구조, 분기, 페이지, 빈칸, 단어배열)
      ****************************************************************/
 
     const textbookOptions = {
@@ -82,7 +80,6 @@
         "YBM 한상호"
       ]
     };
-
     const contentData = {
       "영어1": {
         "금성 최인철":  { "Lesson 1 : What Are Friends For?": [
@@ -2711,8 +2708,6 @@
     const nextBtn = document.getElementById('next-btn');
     const blankBtn = document.getElementById('blank-btn');
     const wordArrangeBtn = document.getElementById('word-arrange-btn');
-    // 새로 추가된 정답 버튼
-    const showAnswerBtn = document.getElementById('show-answer-btn');
 
     function renderPage(page) {
       sentenceContainer.innerHTML = '';
@@ -2726,8 +2721,10 @@
       pageSentences.forEach((pair, index) => {
         const pairDiv = document.createElement('div');
         pairDiv.classList.add('sentence-pair');
+        // (중요) 현재 문장의 '상태'를 저장: 처음엔 'original'
+        pairDiv.setAttribute('data-state', 'original');
         pairDiv.setAttribute('data-index', start + index);
-        
+
         const englishDiv = document.createElement('div');
         englishDiv.classList.add('english');
         englishDiv.textContent = pair.english;
@@ -2739,9 +2736,20 @@
         pairDiv.appendChild(englishDiv);
         pairDiv.appendChild(koreanDiv);
 
-        // 클릭 시 selected 토글
+        /** 문장 클릭 시 이벤트(중요): 
+         *  상태(state)에 따라 다르게 동작 
+         */
         pairDiv.addEventListener('click', () => {
-          pairDiv.classList.toggle('selected');
+          const currentState = pairDiv.getAttribute('data-state');
+          
+          if (currentState === 'original') {
+            // 원본 상태라면, 단순히 .selected 토글 (빈칸/단어배열 대상 선택)
+            pairDiv.classList.toggle('selected');
+
+          } else {
+            // blank or arrange 상태면 => 원래 문장으로 복원
+            revertToOriginal(pairDiv);
+          }
         });
 
         sentenceContainer.appendChild(pairDiv);
@@ -2759,7 +2767,6 @@
         renderPage(currentPage);
       }
     });
-
     nextBtn.addEventListener('click', (e) => {
       e.preventDefault();
       if (currentPage < totalPages) {
@@ -2767,6 +2774,28 @@
         renderPage(currentPage);
       }
     });
+
+    /** 원래 문장(정답)으로 복원하는 함수 */
+    function revertToOriginal(pairDiv) {
+      // data-index로 원본 문장 찾아오기
+      const index = parseInt(pairDiv.getAttribute('data-index'), 10);
+      const originalEnglish = sentences[index].english;
+      const englishDiv = pairDiv.querySelector('.english');
+
+      // 1) 영어 문장 원상복구 + 표시
+      englishDiv.textContent = originalEnglish;
+      englishDiv.style.display = 'block';
+
+      // 2) 단어 배열 UI 있으면 제거
+      const arrangeContainer = pairDiv.querySelector('.arrange-container');
+      if (arrangeContainer) {
+        pairDiv.removeChild(arrangeContainer);
+      }
+
+      // 3) 상태를 original로 되돌리고, .selected 제거
+      pairDiv.setAttribute('data-state', 'original');
+      pairDiv.classList.remove('selected');
+    }
 
     /** 빈칸 만들기 함수 **/
     function createBlanks(sentence) {
@@ -2776,14 +2805,14 @@
 
       for (let i = 0; i < words.length; i++) {
         const word = words[i];
-        // 대문자 시작 단어, 숫자 포함, 숫자만 있는 단어 등은 빈칸 X
+        // 대문자 시작, 숫자 포함 단어 등은 생략
         if (
           /[A-Za-z]/.test(word) && 
           !/^\d+$/.test(word) &&
           !/[0-9]/.test(word) &&
           !/^[A-Z]/.test(word)
         ) {
-          // 확률 30%로 빈칸 처리, 단 연속 2회까지만
+          // 확률 30%로 빈칸 처리 (연속 2회 제한)
           if (consecutiveOmissions < 2 && Math.random() < 0.3) {
             const cleanedWord = word.replace(/[^A-Za-z]/g, '');
             if (cleanedWord.length > 0) {
@@ -2799,7 +2828,10 @@
       return result;
     }
 
-    /** 빈칸 만들기 버튼 이벤트 **/
+    /** 빈칸 만들기 버튼 이벤트 
+     *  - 선택된(.selected) 문장만 빈칸으로 변환
+     *  - data-state="blank"로 상태 변경
+     **/
     blankBtn.addEventListener('click', () => {
       const selectedPairs = document.querySelectorAll('.sentence-pair.selected');
       selectedPairs.forEach(pair => {
@@ -2810,36 +2842,41 @@
         const englishDiv = pair.querySelector('.english');
         if (englishDiv) {
           englishDiv.textContent = blanksEnglish;
-          englishDiv.style.display = 'block';
+          englishDiv.style.display = 'block'; // 혹시 숨겨졌을 수도 있으므로
         }
+
+        // 상태 변경
+        pair.setAttribute('data-state', 'blank');
+        // 이미 선택한 문장이므로 .selected 유지(원하면 빼도 됨)
       });
     });
 
-    /** 단어 배열 버튼 이벤트 **/
+    /** 단어 배열 버튼 이벤트 
+     *  - 선택된(.selected) 문장에 대해 word-arrange UI 추가
+     *  - data-state="arrange"로 상태 변경
+     **/
     wordArrangeBtn.addEventListener('click', () => {
       const selectedPairs = document.querySelectorAll('.sentence-pair.selected');
       selectedPairs.forEach(pair => {
         const index = pair.getAttribute('data-index');
         
-        // 기존에 word-arrange가 적용된 상태라면(있으면) 지우고 다시 만들 수도 있음
+        // 기존에 arrange-container가 있다면 제거
         const oldContainer = pair.querySelector('.arrange-container');
         if (oldContainer) {
           pair.removeChild(oldContainer);
         }
 
-        // 영어 문장 숨기기 전에 원래 문장으로 복원
+        // 원문 복원 후 숨김 (기존에 빈칸이었거나... 어쨌든 원문으로 되돌린 다음)
         const englishDiv = pair.querySelector('.english');
         if (englishDiv) {
-          // 일단 원문 상태로 돌려둠
           englishDiv.textContent = sentences[index].english;
-          // 단어 배열 할 때는 원문을 숨겨버림
-          englishDiv.style.display = 'none';
+          englishDiv.style.display = 'none'; 
         }
 
         const originalEnglish = sentences[index].english;
         const koreanText = sentences[index].korean;
 
-        // 여기서는 단어를 2~3개 단위로 그룹핑
+        // 2~3단어씩 그룹
         const wordGroups = splitIntoGroups(originalEnglish, 2, 3);
         const shuffledGroups = shuffleArray(wordGroups);
 
@@ -2890,6 +2927,9 @@
         });
 
         pair.appendChild(arrangeContainer);
+
+        // 최종 상태를 arrange로
+        pair.setAttribute('data-state', 'arrange');
       });
     });
 
@@ -2936,34 +2976,6 @@
         }
       });
     }
-
-    /***********************************************************
-     *  새로 추가된 "정답" 버튼 이벤트: 
-     *  1) 빈칸만들기 적용된 문장 -> 원문 복원
-     *  2) 단어 배열이 보이는 경우 -> UI 제거 & 원문 복원
-     ************************************************************/
-    showAnswerBtn.addEventListener('click', () => {
-      // 모든 sentence-pair를 순회하면서 정답(원문)으로 복원
-      const allPairs = document.querySelectorAll('.sentence-pair');
-      allPairs.forEach(pair => {
-        const index = pair.getAttribute('data-index');
-        // 원문(영어 문장)
-        const originalEnglish = sentences[index]?.english || "";
-
-        // 1) 빈칸 만들어진 것 복원
-        const englishDiv = pair.querySelector('.english');
-        if (englishDiv) {
-          englishDiv.textContent = originalEnglish;
-          englishDiv.style.display = 'block';  // 혹시 숨겨져있을 수도 있으므로 보이게
-        }
-
-        // 2) 단어 배열 UI가 있다면 제거
-        const arrangeContainer = pair.querySelector('.arrange-container');
-        if (arrangeContainer) {
-          pair.removeChild(arrangeContainer);
-        }
-      });
-    });
 
     /* 드래그 기능 (controls) */
     const controls = document.getElementById('controls');
