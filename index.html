@@ -7,10 +7,12 @@
 </head>
 <body>
 
-  <!-- (고정) '빈칸 만들기', '단어 배열' 버튼 -->
+  <!-- (고정) '빈칸 만들기', '단어 배열' 버튼 + '정답' 버튼 추가 -->
   <div class="controls" id="controls">
     <button id="blank-btn">빈칸 만들기</button>
     <button id="word-arrange-btn">단어 배열</button>
+    <!-- 새로 추가한 정답 버튼 -->
+    <button id="show-answer-btn">정답</button>
   </div>
 
   <div class="container">
@@ -37,8 +39,7 @@
     <div class="step-container hidden" id="step-lesson">
       <h2>3. 본문 선택</h2>
       <div class="button-group" id="lesson-buttons">
-        <!-- 기존에 1과 ~ 8과를 for문으로 만들던 부분을 없애고,
-             이제 자바스크립트에서 동적으로 과 버튼 생성 -->
+        <!-- 자바스크립트에서 동적으로 과 버튼 생성 -->
       </div>
     </div>
 
@@ -55,7 +56,7 @@
 
   <script>
     /****************************************************************
-     * 자바스크립트 로직 (데이터 구조, 분기, 페이지, 빈칸, 단어배열)
+     * 자바스크립트 로직 (데이터 구조, 분기, 페이지, 빈칸, 단어배열 등)
      ****************************************************************/
 
     const textbookOptions = {
@@ -2681,7 +2682,7 @@
       document.getElementById('memorize-section').classList.add('hidden');
     }
 
-    /** 3) 과(챕터) 선택 - lessonName: "1과","2과"... 그대로 사용 **/
+    /** 3) 과(챕터) 선택 - lessonName: "1과","2과"... **/
     function selectLesson(lessonName) {
       selectedLesson = lessonName;
       const data = contentData?.[selectedCategory]?.[selectedTextbook]?.[selectedLesson];
@@ -2710,6 +2711,8 @@
     const nextBtn = document.getElementById('next-btn');
     const blankBtn = document.getElementById('blank-btn');
     const wordArrangeBtn = document.getElementById('word-arrange-btn');
+    // 새로 추가된 정답 버튼
+    const showAnswerBtn = document.getElementById('show-answer-btn');
 
     function renderPage(page) {
       sentenceContainer.innerHTML = '';
@@ -2736,6 +2739,7 @@
         pairDiv.appendChild(englishDiv);
         pairDiv.appendChild(koreanDiv);
 
+        // 클릭 시 selected 토글
         pairDiv.addEventListener('click', () => {
           pairDiv.classList.toggle('selected');
         });
@@ -2755,6 +2759,7 @@
         renderPage(currentPage);
       }
     });
+
     nextBtn.addEventListener('click', (e) => {
       e.preventDefault();
       if (currentPage < totalPages) {
@@ -2771,12 +2776,14 @@
 
       for (let i = 0; i < words.length; i++) {
         const word = words[i];
+        // 대문자 시작 단어, 숫자 포함, 숫자만 있는 단어 등은 빈칸 X
         if (
           /[A-Za-z]/.test(word) && 
           !/^\d+$/.test(word) &&
           !/[0-9]/.test(word) &&
           !/^[A-Z]/.test(word)
         ) {
+          // 확률 30%로 빈칸 처리, 단 연속 2회까지만
           if (consecutiveOmissions < 2 && Math.random() < 0.3) {
             const cleanedWord = word.replace(/[^A-Za-z]/g, '');
             if (cleanedWord.length > 0) {
@@ -2814,21 +2821,25 @@
       selectedPairs.forEach(pair => {
         const index = pair.getAttribute('data-index');
         
+        // 기존에 word-arrange가 적용된 상태라면(있으면) 지우고 다시 만들 수도 있음
         const oldContainer = pair.querySelector('.arrange-container');
         if (oldContainer) {
           pair.removeChild(oldContainer);
         }
 
+        // 영어 문장 숨기기 전에 원래 문장으로 복원
         const englishDiv = pair.querySelector('.english');
         if (englishDiv) {
+          // 일단 원문 상태로 돌려둠
           englishDiv.textContent = sentences[index].english;
-          // 단어 배열 시 영어 문장 숨기기
+          // 단어 배열 할 때는 원문을 숨겨버림
           englishDiv.style.display = 'none';
         }
 
         const originalEnglish = sentences[index].english;
         const koreanText = sentences[index].korean;
 
+        // 여기서는 단어를 2~3개 단위로 그룹핑
         const wordGroups = splitIntoGroups(originalEnglish, 2, 3);
         const shuffledGroups = shuffleArray(wordGroups);
 
@@ -2926,12 +2937,41 @@
       });
     }
 
+    /***********************************************************
+     *  새로 추가된 "정답" 버튼 이벤트: 
+     *  1) 빈칸만들기 적용된 문장 -> 원문 복원
+     *  2) 단어 배열이 보이는 경우 -> UI 제거 & 원문 복원
+     ************************************************************/
+    showAnswerBtn.addEventListener('click', () => {
+      // 모든 sentence-pair를 순회하면서 정답(원문)으로 복원
+      const allPairs = document.querySelectorAll('.sentence-pair');
+      allPairs.forEach(pair => {
+        const index = pair.getAttribute('data-index');
+        // 원문(영어 문장)
+        const originalEnglish = sentences[index]?.english || "";
+
+        // 1) 빈칸 만들어진 것 복원
+        const englishDiv = pair.querySelector('.english');
+        if (englishDiv) {
+          englishDiv.textContent = originalEnglish;
+          englishDiv.style.display = 'block';  // 혹시 숨겨져있을 수도 있으므로 보이게
+        }
+
+        // 2) 단어 배열 UI가 있다면 제거
+        const arrangeContainer = pair.querySelector('.arrange-container');
+        if (arrangeContainer) {
+          pair.removeChild(arrangeContainer);
+        }
+      });
+    });
+
     /* 드래그 기능 (controls) */
     const controls = document.getElementById('controls');
     let isDragging = false;
     let offsetX, offsetY;
 
     controls.addEventListener('mousedown', (e) => {
+      // 버튼 내부 클릭은 드래그 제외
       if (e.target.tagName.toLowerCase() === 'button') return;
       isDragging = true;
       offsetX = e.clientX - controls.offsetLeft;
